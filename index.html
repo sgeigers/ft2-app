@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <!-- Phone-first: fill the device width, allow the notch/safe areas, no forced
+       scale (unlike the LCD kiosk shell which locks to 1024px). -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>FT2 Mobile</title>
+
+  <!-- PWA: installable to the Android home screen, runs fullscreen (standalone). -->
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#0a0c0e" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="FT2" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+
+  <style>
+    :root {
+      --bg: #0a0c0e;
+      --panel: #141820;
+      --panel-2: #1b212b;
+      --line: #262d38;
+      --text: #e7edf3;
+      --muted: #8a97a7;
+      --accent: #4aa8ff;
+      --ok: #37d67a;
+      --warn: #ffb020;
+      --bad: #ff5964;
+      --radius: 14px;
+      /* Honour the phone's safe areas (notch / home indicator). */
+      --safe-t: env(safe-area-inset-top, 0px);
+      --safe-b: env(safe-area-inset-bottom, 0px);
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+      margin: 0; padding: 0;
+      background: var(--bg); color: var(--text);
+      font-family: 'Space Grotesk', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      /* Prevent overscroll bounce revealing the browser chrome in standalone. */
+      overscroll-behavior-y: none;
+    }
+    #root { min-height: 100dvh; }
+
+    /* --- App shell --------------------------------------------------------- */
+    .app { max-width: 640px; margin: 0 auto; padding:
+      calc(var(--safe-t) + 12px) 12px calc(var(--safe-b) + 24px); }
+
+    .topbar { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+    .topbar .brand { font-weight: 700; font-size: 18px; letter-spacing: .3px; }
+    .topbar .spacer { flex: 1; }
+
+    .pill { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px;
+      border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+    .pill.ok  { color: var(--ok);  border-color: color-mix(in srgb, var(--ok) 45%, var(--line)); }
+    .pill.bad { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 45%, var(--line)); }
+    .pill.warn{ color: var(--warn);border-color: color-mix(in srgb, var(--warn) 45%, var(--line)); }
+
+    .btn { -webkit-appearance: none; appearance: none; border: 1px solid var(--line);
+      background: var(--panel-2); color: var(--text); font: inherit; font-weight: 600;
+      padding: 12px 16px; border-radius: 12px; min-height: 48px; cursor: pointer; }
+    .btn:active { transform: translateY(1px); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: #04121f; }
+    .btn.ghost { background: transparent; color: var(--muted); }
+
+    /* --- Cards / stat grid ------------------------------------------------- */
+    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .card { background: var(--panel); border: 1px solid var(--line);
+      border-radius: var(--radius); padding: 14px; }
+    .card .label { font-size: 12px; color: var(--muted); font-weight: 600;
+      text-transform: uppercase; letter-spacing: .5px; }
+    .card .value { font-size: 26px; font-weight: 700; margin-top: 6px;
+      font-variant-numeric: tabular-nums; }
+    .card .value small { font-size: 13px; color: var(--muted); font-weight: 600; margin-left: 3px; }
+    .card.span2 { grid-column: 1 / -1; }
+
+    .section-title { font-size: 13px; color: var(--muted); font-weight: 700;
+      text-transform: uppercase; letter-spacing: .6px; margin: 20px 2px 8px; }
+
+    .row { display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 14px; background: var(--panel); border: 1px solid var(--line);
+      border-radius: 12px; margin-bottom: 8px; }
+    .row .k { color: var(--muted); font-weight: 600; }
+    .row .v { font-weight: 700; font-variant-numeric: tabular-nums; }
+
+    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block;
+      background: var(--line); }
+    .dot.on { background: var(--ok); }
+    .dot.off { background: #3a4250; }
+
+    .banner { border-radius: 12px; padding: 12px 14px; margin-bottom: 12px;
+      font-weight: 600; border: 1px solid var(--line); }
+    .banner.bad { background: color-mix(in srgb, var(--bad) 15%, var(--panel));
+      border-color: color-mix(in srgb, var(--bad) 55%, var(--line)); color: #ffd7da; }
+    .banner.warn { background: color-mix(in srgb, var(--warn) 14%, var(--panel));
+      border-color: color-mix(in srgb, var(--warn) 55%, var(--line)); color: #ffe6bd; }
+
+    .muted { color: var(--muted); }
+    .center { text-align: center; }
+
+    /* --- Login ------------------------------------------------------------- */
+    .login { max-width: 380px; margin: 0 auto; padding: 18vh 20px 0; }
+    .login h1 { font-size: 22px; margin: 0 0 4px; }
+    .login p { color: var(--muted); margin: 0 0 20px; }
+    .login input { width: 100%; padding: 14px; font: inherit; border-radius: 12px;
+      border: 1px solid var(--line); background: var(--panel); color: var(--text);
+      margin-bottom: 12px; min-height: 50px; }
+    .login label.remember { display: flex; align-items: center; gap: 8px;
+      color: var(--muted); font-size: 14px; margin-bottom: 16px; }
+    .login .err { color: var(--bad); font-size: 14px; margin-bottom: 12px; min-height: 18px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>
