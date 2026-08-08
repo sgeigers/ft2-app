@@ -9,7 +9,7 @@
 // camera stream, control POSTs) is NEVER cached: it's cross-origin in the
 // standalone build and must always hit the network anyway, so telemetry is real.
 // Bump SHELL_VERSION on every mobile build that changes shell assets.
-const SHELL_VERSION = 'ft2m-shell-v2';
+const SHELL_VERSION = 'ft2m-shell-v3';   // v3: no-cache revalidation (2026-08-08)
 const SHELL = [
   './',
   './index.html',
@@ -49,8 +49,18 @@ self.addEventListener('fetch', (e) => {
 
   // Network-first for the shell so a fresh build is picked up when online, with
   // the cache as the offline fallback.
+  //
+  // `cache: 'no-cache'` is load-bearing: a plain fetch() is allowed to come from
+  // the BROWSER's HTTP cache, and GitHub Pages serves these assets with a
+  // ten-minute max-age. So "network-first" was quietly returning the previous
+  // build for up to ten minutes after a publish — the operator updated the app,
+  // saw no change, and the new buttons appeared by themselves several minutes
+  // later (2026-08-08). no-cache still sends a CONDITIONAL request, so an
+  // unchanged shell costs a 304 and no re-download; it just can't be answered
+  // from a stale cache entry. (bundle.js has no content hash in its name, so
+  // there is nothing else forcing revalidation.)
   e.respondWith(
-    fetch(req).then((res) => {
+    fetch(req, { cache: 'no-cache' }).then((res) => {
       const copy = res.clone();
       caches.open(SHELL_VERSION).then((c) => c.put(req, copy)).catch(() => {});
       return res;
