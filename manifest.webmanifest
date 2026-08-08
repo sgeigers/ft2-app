@@ -5,7 +5,8 @@
   "start_url": ".",
   "scope": ".",
   "display": "standalone",
-  "orientation": "portrait",
+  "_orientation_note": "any, not portrait: the camera feed is 640x480 landscape, and pinning the app to portrait meant the fullscreen view had to rotate the PICTURE instead of the phone. The layout already handles landscape (MobileMonitor's two-column `wide` mode).",
+  "orientation": "any",
   "background_color": "#0a0c0e",
   "theme_color": "#0a0c0e",
   "icons": [
