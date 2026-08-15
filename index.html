@@ -110,6 +110,34 @@
     .login label.remember { display: flex; align-items: center; gap: 8px;
       color: var(--muted); font-size: 14px; margin-bottom: 16px; }
     .login .err { color: var(--bad); font-size: 14px; margin-bottom: 12px; min-height: 18px; }
+
+    /* --- Offline mode ------------------------------------------------------ */
+    /* Set on the wrapper by App.jsx when the operator chose "Continue offline".
+       The rules live here rather than in MobileMonitor.jsx because that file is
+       the design export and gets replaced wholesale; a class it never mentions
+       survives every one.
+
+       The RUN tab goes grey. Its readouts are already em-dashes with no machine
+       to feed them, but em-dashes in the live palette — green heaters, a blue
+       material bar, a pulsing LIVE dot — still read as a machine that is simply
+       quiet, and a monitor that can be misread as "all fine" while the line is
+       actually off is the failure worth designing out. Greyscale says "this is
+       not a reading" without needing anyone to parse it.
+
+       `main:first-of-type` is the RUN tab: the design renders it first and hides
+       it with display:none when the LOG tab is up, so the log's own <main> is
+       never the first of its type. The LOG tab stays in full colour — it is
+       showing real recorded history, which is the whole point of being here. */
+    .ft2-offline main:first-of-type { filter: grayscale(1); opacity: .45; }
+    /* Nothing in there is worth tapping without a machine — least of all the
+       camera, which would open a fullscreen viewer onto a stream that is not
+       coming. */
+    .ft2-offline main:first-of-type { pointer-events: none; }
+    /* STOP and E-STOP: hidden, not dimmed. A stop control that cannot reach the
+       machine is not a degraded control, it is not a control — and someone
+       reaching for it in a hurry must not find it here. The real one is on the
+       machine. */
+    .ft2-offline .ft2-actionbar { display: none; }
   </style>
 </head>
 <body>
